@@ -32,7 +32,7 @@ public abstract class Mapplet {
     public final void initialize(MappletContext context) throws JTGLException{
         if(!initialized){
             setContext(context);
-            debugMsg("JTGL (Java Tiny Gfx Library) v0.76 http://www.jtgl.org");
+            debugMsg("JTGL (Java Tiny Gfx Library) v0.77 http://www.jtgl.org");
             initialize();
             initialized = true;
         }

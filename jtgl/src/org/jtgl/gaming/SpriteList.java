@@ -310,7 +310,7 @@ public final class SpriteList {
                 break;
             }
             index++;
-            internalSprite = internalSprite.next;;
+            internalSprite = internalSprite.next;
         }
         return collideIndex;
     }

@@ -1,0 +1,880 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="JTGL" basedir="." default="all">
+
+    <!-- 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////// USER CONFIG PROPERTIES:////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////// 
+    -->
+
+    <target name="config">                        
+        <!-- ///// Paths config: ////// -->
+        <property name="classes" value="classes"/>
+        <property name="sources" value="src"/>
+        <property name="libs" value="lib"/>
+        <property name="jars" value="dist"/>
+        <property name="javadocs" value="doc/javadocs"/>        
+        <!-- ///// API config: /////// -->
+        <property name="ui_api" value="no"/>
+        <property name="gaming_api" value="no"/>
+        <property name="extension_api" value="no"/>
+    </target>
+
+    <target name="config-advanced">        
+        <!-- Standard javac compiling options: -->
+        <property name="compiler.source" value="1.3"/>    
+        <property name="compiler.target" value="1.1"/> 
+        <property name="compiler.optimize" value="true"/>   
+        <property name="compiler.deprecation" value="false"/>   
+        <property name="compiler.debug" value="false"/>
+        <property name="compiler.verbose" value="false"/>
+        <!-- Wireless Toolkit compiling with antenna: -->
+        <property name="wtk.compiler.source" value="1.3"/>    
+        <property name="wtk.compiler.target" value="1.1"/> 
+        <property name="wtk.compiler.optimize" value="true"/> 
+        <property name="wtk.compiler.preverify" value="true"/>   
+        <property name="wtk.compiler.deprecation" value="false"/>   
+        <property name="wtk.compiler.debug" value="false"/>
+        <property name="wtk.compiler.verbose" value="false"/>        
+        <!-- Wireless Toolkit antenna config: -->
+        <property name="wtkjad.update" value="yes"/>
+        
+        <!--/////////////////////////////////////////////////////-->
+        <!-- Do not change this properties: -->
+        <property name="project.name" value="${ant.project.name}"/>            
+        <property name="project.url" value="http://www.jtgl.org"/>            
+        <property name="project.title" value="${project.name} (${project.url})"/>
+        <property name="project.version" value="0.77"/>
+        <property name="project.author" value="Manuel Polo (manuel_polo@yahoo.es)"/>                        
+        <property name="jtgl.targets" value="awt,midp,midp-nokia,midp-siemens,midp2,superwaba" />
+    </target>
+    
+    
+    <!-- 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////// 
+    -->
+    <target name="_config-packages">
+        <patternset id="package.jtgl.base"  description="JTGL Base API">
+            <include name="org/jtgl/core/*.java"/>
+            <include name="org/jtgl/image/*.java"/>
+            <include name="org/jtgl/input/*.java"/>        
+        </patternset>
+
+        <patternset id="package.jtgl.gaming" description="Gaming API">        
+            <include name="org/jtgl/gaming/*.java" if="include.gaming_api"/>
+            <exclude name="org/jtgl/gaming/OpTiledSurface.java"/>
+            <exclude name="org/jtgl/gaming/Bresenham.java"/>
+        </patternset>
+
+        <patternset id="package.jtgl.extension" description="Extension API">            
+            <include name="org/jtgl/ext/**/*.java" if="include.extension_api"/>
+        </patternset>    
+
+        <patternset id="package.jtgl.ui" description="UI API">            
+            <include name="org/jtgl/ui/**/*.java" if="include.ui_api"/>
+        </patternset>    
+
+        <patternset id="package.jtgl.micro" description="Micro API">            
+            <include name="org/jtgl/micro/*.java"/>            
+            <exclude name="org/jtgl/micro/GameMapplet.java" unless="include.gaming_api"/>
+            <exclude name="org/jtgl/micro/MicroExtensionManager.java" unless="include.extension_api"/>
+        </patternset>    
+
+        <patternset id="package.jtgl"  description="JTGL Base Packages">
+            <patternset refid="package.jtgl.base"/>            
+            <patternset refid="package.jtgl.gaming"/>                        
+            <patternset refid="package.jtgl.extension"/>         
+            <patternset refid="package.jtgl.ui"/>         
+            <patternset refid="package.jtgl.micro"/>               
+        </patternset>        
+        
+        <!-- ////////////////////////// -->
+        
+        <patternset id="package.build" description="Bin package">                        
+            <include name="**"/>                    
+            <exclude name="**/*.class"/>            
+        </patternset>    
+        
+        <patternset id="package.app.build" description="Client application bin package">                        
+            <patternset refid="package.build"/>                                    
+            <exclude name="targets/**"/>            
+        </patternset>            
+        
+        <patternset id="package.javadocs" description="JavaDocs source package">                        
+            <patternset refid="package.jtgl"/>                                    
+        </patternset>            
+        
+    </target>
+    
+    <target name="_root-path-config" unless="root.path">
+        <property name="root.path" value="${basedir}"/>
+    </target>   
+    
+    
+    <target name="_build-root-paths" depends="_root-path-config" unless="app.src" description="Build paths for base library">
+        <!-- home.dir is the root of all -->
+        <property name="home.dir" location="${root.path}"/>
+        <property name="classes.dir" location="${home.dir}/${classes}"/>
+        <property name="src.dir" location="${home.dir}/${sources}"/>
+        <property name="lib.dir" location="${home.dir}/${libs}"/>
+        <property name="jar.dir" location="${home.dir}/${jars}"/>
+        <property name="jar" value="${home.dir}/${jars}/${project.name}_v${project.version}" />
+        <property name="javadoc.dir" location="${home.dir}/${javadocs}"/>        
+        <antcall target="_debug_paths"/>
+    </target>
+    
+    <target name="_build-app-root-paths" depends="_root-path-config" if="app.src" description="Build paths for client applications">
+        <!-- home.dir is the root of all -->
+        <property name="home.dir" location="${root.path}"/>
+        <property name="classes.dir" location="${app.src}/${classes}"/>
+        <property name="src.dir" location="${home.dir}/${sources}"/>
+        <property name="lib.dir" location="${home.dir}/${libs}"/>
+        <property name="jar.dir" location="${app.src}/${jars}"/>
+        <property name="jar" value="${app.src}/${jars}/${project.name}"/>
+        <property name="javadoc.dir" location="${app.src}/${javadocs}"/>                        
+        <antcall target="_debug_paths"/>
+    </target>
+    
+    <target name="_debug_paths" if="debug.paths">
+        <!-- to debug paths: -->
+        <echo message="classes.dir =${classes.dir}"/>
+        <echo message="src.dir =${src.dir}"/>
+        <echo message="lib.dir =${lib.dir}"/>
+        <echo message="jar.dir =${jar.dir}"/>
+        <echo message="jar prefix: ${jar}"/>        
+        <echo message="javadoc.dir =${javadoc.dir}"/>    
+    </target>
+    
+    <target name="_build-paths" depends="_root-path-config,_build-root-paths,_build-app-root-paths">
+    </target>
+    
+    <target name="_config-props" depends="config,config-advanced,_build-paths" description="Configure API inclusion variables">        
+        <condition property="include.gaming_api">
+            <istrue value="${gaming_api}"/>
+        </condition>            
+        <condition property="include.extension_api">
+            <istrue value="${extension_api}"/>
+        </condition>        
+        <condition property="include.ui_api">
+            <istrue value="${ui_api}"/>
+        </condition>                
+    </target>
+    
+    <target name="init" depends="_config-props,_config-packages"> 
+        <tstamp/>
+        <property file="${home.dir}/build.properties"/>
+    </target>
+    
+   
+    
+    <target name="base" depends="init" >                    
+        <mkdir dir="${classes.dir}/base"/>
+        <antcall target="_javac">
+            <param name="destdir" value="${classes.dir}/base"/>
+            <param name="patternref" value="package.jtgl"/>
+        </antcall>        
+    </target>
+
+    <target name="init-midp" depends="init" >                   
+        <taskdef resource="antenna.properties" classpath="${antenna.lib}"/>          
+    </target>
+    
+    <target name="base-midp" depends="init-midp" >                                
+        <mkdir dir="${classes.dir}/base"/>
+        <wtkbuild 
+            source="${wtk.compiler.source}" 
+            target="${wtk.compiler.target}" 
+            debug="${wtk.compiler.debug}" 
+            optimize="${wtk.compiler.optimize}"
+            verbose="${wtk.compiler.verbose}" 
+            deprecation="${wtk.compiler.deprecation}" 
+            destdir="${classes.dir}/base" srcdir="${src.dir}">
+                <patternset refid="package.jtgl"/>            
+        </wtkbuild>
+    </target>    
+    
+    <!-- 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////// BUILDS ////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////// 
+    -->
+    
+    
+    <!-- ///////////////////// PLATFORMS: ////////////////////////////////////////////////////////////////////// -->
+
+    <!-- ///////////////////// J2SE: ///////////////////// -->    
+    <target name="awt" depends="base" >
+        <antcall target="_build-package">
+            <param name="package" value="awt"/>
+        </antcall>       
+        <antcall target="_javac">
+            <param name="destdir" value="${classes.dir}/awt"/>
+            <param name="includes" value="org/jtgl/impl/common/Default*"/>
+        </antcall>        
+    </target>
+
+    <target name="swing" depends="base" >        
+        <antcall target="_build-package">
+            <param name="package" value="swing"/>
+        </antcall>        
+        <antcall target="_javac">
+            <param name="destdir" value="${classes.dir}/swing"/>
+            <param name="includes" value="org/jtgl/impl/common/Default*"/>
+        </antcall>        
+    </target>
+
+    <target name="swingwt" depends="base" >        
+        <antcall target="_create-package">
+            <param name="package" value="swingwt"/>
+        </antcall>        
+        <antcall target="_javac">
+            <param name="destdir" value="${classes.dir}/swingwt"/>
+            <param name="includes" value="org/jtgl/micro/impl/swingwt/*"/>
+        </antcall>
+    </target>
+        
+    <!-- ///////////////////// MIDP: ///////////////////// -->    
+  
+    <target name="midp" depends="base-midp" >                
+        <antcall target="_build-package-midp">
+            <param name="package" value="midp"/>
+        </antcall>                    
+    </target>
+
+    <target name="midp-siemens" depends="base-midp" >     
+        <condition property="siemens_api.available">            
+            <available file="${siemens.lib}"/>            
+        </condition>                
+        <fail unless="siemens_api.available" message="Siemens library API not found!"/>                                
+        <echo message="Siemens lib:${siemens.lib}"/>                
+        <property name="target.classpath" value="${siemens.lib}"/> <!-- Export needed classpath to other tasks (app builds) -->        
+        <antcall target="_build-package-midp">
+            <param name="package" value="midp-siemens"/>
+            <param name="package.name" value="siemens"/>        
+            <param name="package.classpath" value="${siemens.lib}"/>        
+            <param name="package.base" value="midp/"/>        
+        </antcall>                        
+    </target>
+
+    <target name="midp-nokia" depends="base-midp" >        
+        <condition property="nokia.available">            
+            <available file="${nokia.lib}"/>            
+        </condition>                
+        <fail unless="nokia.available" message="Nokia library API not found!"/>                        
+        <echo message="Nokia lib:${nokia.lib}"/>    
+        <property name="target.classpath" value="${nokia.lib}"/> <!-- Export needed classpath to other tasks (app builds) -->        
+        <antcall target="_build-package-midp">
+            <param name="package" value="midp-nokia"/>
+            <param name="package.name" value="nokia"/>        
+            <param name="package.classpath" value="${nokia.lib}"/>        
+            <param name="package.base" value="midp/"/>        
+        </antcall>                                
+    </target>
+    
+    <!-- ///////////////////// MIDP2: ///////////////////// -->    
+
+    <target name="midp2" depends="base-midp" >        
+        <antcall target="_build-package-midp">
+            <param name="package" value="midp2"/>
+        </antcall>                                
+    </target>
+    
+    <!-- ///////////////////// DoJa: ///////////////////// -->            
+    
+    <!-- ///////////////////// ExEn: ///////////////////// -->            
+    <target name="exen" depends="base" >        
+        <echo message="ExEn Build Unavailable in this release (${project.version})"/>
+        <!-- 
+        <mkdir dir="${classes.dir}/exen"/>
+        <antcall target="_javac">
+            <param name="destdir" value="${classes.dir}/exen"/>
+            <param name="includes" value="org/jtgl/impl/exen/*,org/jtgl/micro/impl/exen/*"/>
+        </antcall>
+        -->        
+    </target>        
+    
+    <!-- ///////////////////// SuperWaba: ///////////////////// -->        
+    <target name="_init-superwaba" depends="base" >
+        <condition property="superwaba.found">            
+            <available file="${superwaba.home}/lib/Waba_only.jar"/>            
+        </condition>                
+        <fail unless="superwaba.found" message="SuperWaba not found at ${superwaba.home}"/>        
+        <property name="waba.lib" value="${superwaba.home}/lib/Waba_only.jar"/>
+        <echo message="SuperWaba HOME:${superwaba.home}"/>                 
+        <echo message="Waba lib:${waba.lib}"/>   
+        <property name="target.classpath" value="${waba.lib}"/> <!-- Export needed classpath to other tasks (app builds) -->                                      
+    </target>
+    
+    <target name="superwaba" depends="_init-superwaba">
+        <antcall target="_build-package">
+            <param name="package" value="superwaba"/>
+            <param name="package.classpath" value="${waba.lib}"/>        
+        </antcall>   
+    </target>
+                    
+    <!-- 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////// ARCHIVING/PACKAGING:///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////// 
+    -->
+    
+    <target name="jar-base" depends="init,base" >
+        <mkdir dir="${jar.dir}"/>
+        <jar basedir="${classes.dir}/base" compress="true" jarfile="${jar}.jar">
+            <manifest>
+                <attribute name="Specification-Title" value="${project.title}"/>
+                <attribute name="Specification-Vendor" value="${project.author}"/>                
+                <attribute name="Specification-Version" value="${project.version}"/>                
+                <attribute name="Implementation-Title" value="${project.name}"/>
+                <attribute name="Implementation-Vendor" value="${project.author}"/>                
+                <attribute name="Implementation-Version" value="${project.version} ${DSTAMP} ${TSTAMP}"/>                
+            </manifest>                
+        </jar>
+    </target>
+
+    <!-- ///////////////////// PLATFORMS: ////////////////////////////////////////////////////////////////////// -->
+
+    <!-- ///////////////////// J2SE: ///////////////////// -->        
+    <target name="jar-awt" depends="awt" >
+        <antcall target="_jar-package">
+            <param name="package" value="awt"/>
+        </antcall>                   
+    </target>
+    <target name="jar-swing" depends="swing" >
+        <antcall target="_jar-package">
+            <param name="package" value="swing"/>
+        </antcall>                   
+    </target>
+    <target name="jar-swingwt" depends="swingwt" >
+        <antcall target="_jar-package">
+            <param name="package" value="swingwt"/>
+        </antcall>                   
+    </target>
+    
+    <!-- ///////////////////// MIDP: ///////////////////// -->    
+    <target name="jar-midp" depends="midp" >
+        <antcall target="_jar-package-midp">
+            <param name="package" value="midp"/>
+        </antcall>                   
+    </target>
+    <target name="jar-midp-siemens" depends="midp-siemens" >
+        <antcall target="_jar-package-midp">
+            <param name="package" value="midp-siemens"/>
+        </antcall>                   
+    </target>
+    <target name="jar-midp-nokia" depends="midp-nokia" >
+        <antcall target="_jar-package-midp">
+            <param name="package" value="midp-nokia"/>
+        </antcall>                   
+    </target>
+    
+    <!-- ///////////////////// MIDP2: //////////////////// -->    
+    <target name="jar-midp2" depends="midp2" >
+        <antcall target="_jar-package-midp">
+            <param name="package" value="midp2"/>
+        </antcall>                   
+    </target>
+    
+    <!-- ///////////////////// Extra Platforms: ///////////////////// -->                
+    
+    <!-- ///////////////////// DoJa: ///////////////////// -->                
+    <!-- ///////////////////// ExEn: ///////////////////// -->            
+    <!-- ///////////////////// SuperWaba: ///////////////////// -->        
+    <target name="jar-superwaba" depends="superwaba" >
+        <antcall target="_jar-package">
+            <param name="package" value="superwaba"/>
+        </antcall>                        
+    </target>
+    
+
+    <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////// APP Building ///////////////////////////////////////////////////////////////// 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    
+    <target name="_app-config-defaults">            
+        <condition property="app.name" value="${ant.project.name}">
+            <not><isset property="app.name" /></not>
+        </condition>    
+        <condition property="app.title" value="${app.name}">
+            <not><isset property="app.title"/></not>
+        </condition>                    
+        <condition property="app.vendor" value="${project.author}">
+            <not><isset property="app.vendor"/></not>
+        </condition>                
+        <condition property="app.version" value="1.0">
+            <not><isset property="app.version"/></not>
+        </condition>             
+        <condition property="app.resource.dir" value="res">
+            <and>
+                <available file="${app.src}/res"/>            
+                <not><isset property="app.resource.dir"/></not>
+            </and>
+        </condition>           
+    </target>
+    
+    
+    <target name="_app-check-target_src">
+        <fail unless="app.target" message="app.target not set!"/>
+        <fail unless="app.src" message="app.src not set!"/>
+    </target>
+        
+    <target name="_app-config-mapplet" depends="_app-check-target_src">
+        <echo message="Copying Mapplet runner from ${app.src}/targets/${app.target}/*MappletRunner.java to ${app.src} ..."/>                
+        <copy todir="${app.src}" verbose="true">
+            <fileset dir="${app.src}/targets/${app.target}" includes="*mappletrunner.java" casesensitive="false"/>        
+        </copy>        
+    </target>
+    
+    <target name="_app-config-classpath" >
+        <condition property="app.classpath" value="${classes.dir}/${app.target};${target.classpath}">    
+            <isset property="target.classpath"/>
+        </condition>           
+        <condition property="app.classpath" value="${classes.dir}/${app.target}">    
+            <not><isset property="app.classpath"/></not>
+        </condition>                   
+        <echo message="app.classpath=${app.classpath}"/>
+    </target>
+    
+    
+    <target name="_app-build-base"  depends="_app-check-target_src,_app-config-classpath">
+        <echo message="Building app ${app.name} at ${app.src} with target ${app.target}"/>                        
+        <antcall target="_javac">
+            <param name="classpath" value="${app.classpath}"/>
+            <param name="srcdir" value="${app.src}"/>
+            <param name="destdir" value="${classes.dir}/${app.target}"/>
+            <param name="patternref" value="package.app.build"/>
+        </antcall>                
+    </target>
+
+    <target name="_app-build-base-midp"  depends="_app-check-target_src,_app-config-classpath">                
+        <echo message="Building app ${project.name} at ${app.src} with target ${app.target}"/>                
+        <wtkbuild 
+            source="${wtk.compiler.source}" 
+            target="${wtk.compiler.target}" 
+            debug="${wtk.compiler.debug}" 
+            optimize="${wtk.compiler.optimize}"
+            verbose="${wtk.compiler.verbose}" 
+            deprecation="${wtk.compiler.deprecation}" 
+            classpath="${app.classpath}" 
+            destdir="${classes.dir}/${app.target}" srcdir="${app.src}" listfiles="true">
+                <patternset refid="package.app.build"/>                    
+        </wtkbuild>        
+    </target>
+        
+    <target name="_build-base-app" depends="init">                
+        <fail unless="app.target" message="app.target not set!"/>
+        <antcall target="${app.target}"/>
+        <antcall target="_app-config-mapplet"/>
+        <antcall target="_app-build-base"/>
+    </target>
+    
+    <target name="_build-base-app-external" depends="_app-config-mapplet,_app-build-base" />                
+    <target name="_build-base-app-superwaba" depends="superwaba,_build-base-app-external">                
+    </target>
+    
+    
+    <target name="_build-base-app-superwaba-ppc" depends="_build-base-app-superwaba" description="Builds a PocketPC SuperWaba application" >                
+        
+    </target>
+    
+    <target name="_build-base-app-midp" depends="init-midp" >                
+        <fail unless="app.target" message="app.target not set!"/>
+        <antcall target="${app.target}"/>
+        <antcall target="_app-config-mapplet"/>
+        <antcall target="_app-build-base-midp"/>
+    </target>   
+    
+    <target name="_build-base-app-midp-external" depends="_app-config-mapplet,_app-build-base-midp" />                    
+    <target name="_build-base-app-midp-nokia" depends="midp-nokia,_build-base-app-midp-external" />                         
+    <target name="_build-base-app-midp-siemens" depends="midp-siemens,_build-base-app-midp-external" />                         
+        
+    
+    
+    <target name="_app-check-target">
+        <fail unless="app.target" message="app.target not set (Posible values are ${jtgl.targets})"/>         
+    </target>  
+
+    <target name="_app-init" depends="init,_app-check-target,_app-config-defaults">                               
+       <!--TODO: add a pre init task to load an app.properties and/or app.${app.target}.properties file if present at ${app.src} -->
+       <condition property="build.subfix" value="-midp">
+        <or>
+            <equals arg1="midp" arg2="${app.target}" trim="true"/>
+            <equals arg1="midp2" arg2="${app.target}" trim="true"/>
+        </or>
+       </condition>
+       <condition property="build.subfix" value="">
+        <or>
+            <equals arg1="awt" arg2="${app.target}" trim="true"/>
+            <equals arg1="swing" arg2="${app.target}" trim="true"/>
+        </or>
+       </condition>       
+       <!-- Prepare a special target build (To configure external libs): -->
+       <property name="build.subfix" value="-${app.target}" />
+       
+       <property name="package" value="${app.target}"/>
+    </target>    
+    
+    
+    <target name="_app-build" depends="_app-init" description="Builds a client application.">                            
+        <echo message="Building app ${app.name}"/>                                                
+        <antcall target="_build-base-app${build.subfix}"/>
+    </target>
+    
+    <target name="_app-build-resources" if="app.resource.dir" depends="_app-init" description="Builds a client application with its resources.">                            
+        <condition property="app.resource.filter" value="**">
+            <not><isset property="app.resource.filter" /></not>
+        </condition>
+        <echo message="Adding (${app.resource.filter}) resources from app ${app.name}"/>                                                
+        <copy todir="${classes.dir}/${app.target}/${app.resource.dir}" verbose="true">
+            <fileset dir="${app.src}/${app.resource.dir}">
+                <include name="${app.resource.filter}"/>
+            </fileset>
+        </copy>
+    </target>
+    
+
+    <target name="_app-all-checkjar" if="app.jar.unavailable" description="Builds all unless jar target is present">
+        <echo message="Building all because jar target is not present"/>    
+        <antcall target="app-jar"/>
+        <antcall target="_app-clean-classes"/>
+    </target>    
+    
+    <target name="_app-run" depends="_app-init,_app-clean-classes,_config-jar" description="Runs the application target">        
+        <property name="app.jar" value="${jar.name}.jar"/>
+        <condition property="app.jar.unavailable">   
+            <not>
+                <available file="${app.jar}"/>
+            </not>
+        </condition>                         
+        <antcall target="_app-all-checkjar"/>        
+        <antcall target="_app-run-default${build.subfix}"/>
+    </target>
+    
+    <target name="_app-run-default" description="Runs the application with default jvm">
+        <echo message="Running with default jvm at ${jar.dir} ${app.jar}"/>
+        <java dir="${jar.dir}" jar="${app.jar}" fork="true"/>
+    </target>
+
+    <target name="_app-run-default-midp" depends="init-midp" description="Runs the application with default midp emulator">
+        <echo message="Running with default midp emulator at ${jar.dir} ${app.jar}"/>
+        <wtkrun jadfile="${jar.name}.jad" wait="true"/>
+    </target>
+
+    
+    <target name="_app-run-default-superwaba" depends="_init-superwaba" description="Runs the application with SuperWaba emulator applet">
+        <echo message="Running with SuperWaba emulator applet"/> 
+        <!-- SW needs the whole application out of a jar in its app-run target: -->
+        <unjar src="${jar.name}.jar" dest="${classes.dir}" />        
+        <ant dir="${superwaba.home}" antfile="${superwaba.home}/build.xml" target="app-run">                        
+            <property name="app.build" value="${classes.dir}"/>
+            <property name="build.libs" value="${waba.lib}"/>
+            <property name="main.class" value="${app.mainclass}"/>        
+        </ant>                        
+    </target>
+        
+    
+    <target name="app-jar" depends="_app-build,_app-build-resources" description="Builds and jars a client application.">            
+        <antcall target="jar-${app.target}" />            
+        <antcall target="_app-pack-subtarget"/>                        
+        <antcall target="_app-clean-classes"/>             
+    </target>
+
+    <!-- Special App Packaging: -->    
+    <target name="_app-pack-subtarget" if="app.subtarget">
+        <antcall target="_app-pack-${app.target}-${app.subtarget}"/>
+    </target>
+    
+    <target name="_app-pack-superwaba-palmos" depends="_config-jar" description="Builds a PalmOS SuperWaba application">
+        <echo message="Packing PalmOS app from jar ${jar.name}.jar Version: ${app.version}"/>
+        <echo message="@ ${jar.dir}"/>        
+        
+        <!-- call app-warp to build SuperWaba Utils -->
+        <ant dir="${superwaba.home}" antfile="${superwaba.home}/build.xml" target="compile-utils">                        
+            <property name="warp.name" value="${app.name}"/>
+            <property name="warp.options" value=""/>
+            <property name="warp.files" value="${jar.name}.jar"/>
+            <property name="build.temp" value="${jar.dir}"/>
+        </ant>                        
+        <!-- call Warp to build a PalmOS application pdb -->
+        <java classname="Warp" fork="yes" dir="${jar.dir}">
+            <classpath>
+              <pathelement path="${superwaba.home}/build/utils"/>
+            </classpath>
+            <arg value="c"/>        
+            <arg line="${app.name}"/>
+            <arg line="${jar.name}.jar"/>            
+        </java>        
+        <!-- call Exegen to build a PalmOS application prc executable -->
+        <java classname="Exegen" fork="yes" dir="${jar.dir}">
+            <classpath>
+              <pathelement path="${superwaba.home}/lib/SuperWaba.jar"/>              
+              <pathelement path="${superwaba.home}/utils"/>
+            </classpath>            
+            <arg line="/V '${app.version}'"/>
+            <arg line="/T '${app.title}'"/>            
+            <arg line="${app.name}"/>
+            <arg line="${app.mainclass}"/>            
+        </java>                
+    </target>
+
+
+    <target name="_app-clean-classes" description="Clean up client application (classes only).">
+        <antcall target="clean-classes"/>
+        <delete quiet="true">
+            <fileset dir="${app.src}" includes="*mappletrunner.java" casesensitive="false"/>
+        </delete>                            
+    </target>    
+        
+    <target name="_app-clean-all" depends="_app-clean-classes" description="Clean up client application (classes and jars).">
+        <antcall target="clean"/>
+    </target>    
+    
+    <!-- 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////// Utility method targets: ///////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////// 
+    -->
+    
+    <target name="_javac" depends="_javac_includes,_javac_pattern" />        
+    
+    <target name="_javac_init" depends="init">
+        <condition property="classpath" value="">    
+            <or>
+                <isset property="classpath"/>
+            <not>
+                <equals arg1="${classpath}" arg2="" trim="true"/>
+            </not>
+            </or>
+        </condition>                            
+        <condition property="srcdir" value="${src.dir}">    
+            <or>
+                <isset property="srcdir"/>
+            <not>
+                <equals arg1="${srcdir}" arg2="" trim="true"/>
+            </not>
+            </or>
+        </condition>                                    
+    </target>
+    
+    <target name="_javac_includes" if="includes" depends="_javac_init">            
+        <javac              
+            source="${compiler.source}" 
+            target="${compiler.target}" 
+            debug="${compiler.debug}" 
+            optimize="${compiler.optimize}"
+            verbose="${compiler.verbose}" 
+            deprecation="${compiler.deprecation}" 
+            classpath="${classpath}" 
+            destdir="${destdir}" srcdir="${srcdir}"
+            includes="${includes}">                        
+        </javac>    
+    </target>
+
+    <target name="_javac_pattern" if="patternref" depends="_javac_init">                
+        <javac  
+            source="${compiler.source}" 
+            target="${compiler.target}" 
+            debug="${compiler.debug}" 
+            optimize="${compiler.optimize}"
+            verbose="${compiler.verbose}" 
+            deprecation="${compiler.deprecation}" 
+            classpath="${classpath}" 
+            destdir="${destdir}" srcdir="${srcdir}">
+                <patternset refid="${patternref}"/>
+        </javac>    
+    </target>
+        
+    <target name="_config-jar">
+        <mkdir dir="${jar.dir}"/>
+        <fail unless="package" message="package not set"/>
+        <property name="jar.name" value="${jar}_${package}"/>    
+    </target>
+    
+    <target name="_jar-package-with-main" if="app.mainclass" description="Jars a package with a main class (executable jar)">        
+        <jar basedir="${classes.dir}/${package}" compress="true" jarfile="${jar.name}.jar" >        
+            <manifest>
+                <attribute name="Specification-Title" value="${project.title}"/>
+                <attribute name="Specification-Vendor" value="${project.author}"/>                
+                <attribute name="Specification-Version" value="${project.version}"/>                
+                <attribute name="Implementation-Title" value="${project.name}"/>
+                <attribute name="Implementation-Vendor" value="${project.author}"/>                
+                <attribute name="Implementation-Version" value="${project.version} ${DSTAMP} ${TSTAMP}"/>                
+                <attribute name="Main-class" value="${app.mainclass}"/>
+            </manifest>        
+        </jar>
+    </target>
+
+    <target name="_jar-package-without-main" unless="app.mainclass" description="Jars a package without a main class (executable jar)">        
+        <jar basedir="${classes.dir}/${package}" compress="true" jarfile="${jar.name}.jar">        
+            <manifest>
+                <attribute name="Specification-Title" value="${project.title}"/>
+                <attribute name="Specification-Vendor" value="${project.author}"/>                
+                <attribute name="Specification-Version" value="${project.version}"/>                
+                <attribute name="Implementation-Title" value="${project.name}"/>
+                <attribute name="Implementation-Vendor" value="${project.author}"/>                
+                <attribute name="Implementation-Version" value="${project.version} ${DSTAMP} ${TSTAMP}"/>                
+            </manifest>        
+        </jar>
+    </target>
+        
+    <target name="_jar-package" depends="init,_config-jar,_jar-package-with-main,_jar-package-without-main" description="Jars a package" />    
+    
+
+    
+    <target name="_jar-package-midp-with-jad" if="app.mainclass" depends="_config-jar,_app-config-defaults" description="Create JAD/JAR ">                    
+        <wtkjad 
+            jadfile="${jar.name}.jad" 
+            jarfile="${jar.name}.jar" 
+            update="${wtkjad.update}" 
+            name="${app.name}" 
+            version="${app.version}" 
+            vendor="${app.vendor}">
+                <midlet name="${app.name}" class="${app.mainclass}" icon="${app.icon}" if="app.icon"/>            
+                <midlet name="${app.name}" class="${app.mainclass}" unless="app.icon"/>            
+        </wtkjad>    
+        <wtkpackage 
+            basedir="${classes.dir}/${package}" 
+            compress="true" 
+            jarfile="${jar.name}.jar" 
+            jadfile="${jar.name}.jad"  
+            preverify="false">        
+        </wtkpackage>                           
+    </target>
+    
+    <target name="_jar-package-midp-without-jad" unless="app.mainclass" depends="_config-jar,_jar-package-without-main">            
+    </target>
+    
+    <target name="_jar-package-midp" depends="init-midp,_jar-package-midp-with-jad,_jar-package-midp-without-jad" description="Jars a midp (wtk) package">                  
+        
+    </target>
+        
+    <target name="_create-package" depends="init" description="Creates a new package merged with the base JTGL package">
+        <fail unless="package" message="package not set"/>
+        <mkdir dir="${classes.dir}/${package}"/>
+        <echo message="Copy base package from ${classes.dir}/base to ${classes.dir}/${package}"/>                
+        <copy todir="${classes.dir}/${package}">
+            <fileset dir="${classes.dir}/base" excludes="**/*.java"/>
+        </copy>
+    </target>
+    
+    <target name="_build-package" depends="init" description="Builds a new generic package merged with the base JTGL package">
+        <fail unless="package" message="package not set"/>
+        <antcall target="_create-package">
+            <param name="package" value="${package}"/>
+        </antcall>               
+        <condition property="package.classpath" value="">    
+            <or>
+                <isset property="package.classpath"/>
+            <not>
+                <equals arg1="${package.classpath}" arg2="" trim="true"/>
+            </not>
+            </or>
+        </condition>                
+        <antcall target="_javac">        
+            <param name="destdir" value="${classes.dir}/${package}"/>
+            <param name="classpath" value="${package.classpath}"/>            
+            <param name="includes" value="org/jtgl/impl/${package}/*,org/jtgl/micro/impl/${package}/*"/>
+        </antcall>        
+          
+        <!-- Copy property files that may be needed: -->
+        <copy todir="${classes.dir}/${package}/org/jtgl/micro/impl/${package}">
+            <fileset dir="${src.dir}/org/jtgl/micro/impl/${package}" includes="*.properties"/>
+        </copy>                   
+    </target>
+
+    <target name="_build-package-midp" depends="init" description="Builds with antenna a new generic package merged with the base JTGL package">
+        <fail unless="package" message="package not set"/>
+        <antcall target="_create-package">
+            <param name="package" value="${package}"/>
+        </antcall>               
+        <condition property="package.name" value="${package}">            
+            <not><isset property="package.name"/></not>
+        </condition>
+        <condition property="package.classpath" value="">    
+            <or>
+                <isset property="package.classpath"/>
+            <not>
+                <equals arg1="${package.classpath}" arg2="" trim="true"/>
+            </not>
+            </or>
+        </condition>                
+        <condition property="package.base" value="">    
+            <or>
+                <isset property="package.base"/>
+            <not>
+                <equals arg1="${package.base}" arg2="" trim="true"/>
+            </not>
+            </or>
+        </condition>        
+        <wtkbuild 
+            source="${wtk.compiler.source}" 
+            target="${compiler.target}" 
+            debug="${wtk.compiler.debug}" 
+            optimize="${wtk.compiler.optimize}"
+            verbose="${wtk.compiler.verbose}" 
+            deprecation="${wtk.compiler.deprecation}" 
+            classpath="${package.classpath}" 
+            destdir="${classes.dir}/${package}" srcdir="${src.dir}">        
+                <include name="org/jtgl/impl/${package.base}${package.name}/*"/>        
+                <include name="org/jtgl/micro/impl/${package.base}${package.name}/*"/>        
+        </wtkbuild>    
+    </target>    
+    
+    <target name="_init-javadocs">
+        <!-- Enable all extended api's for full javadocs: -->
+        <property name="gaming_api" value="yes"/>
+        <property name="extension_api" value="yes"/>    
+    </target>
+
+    
+    <!-- //////////////////////////////////////////////////////////////////////////////////////////////////// -->
+    
+    <!-- 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////// Various generic targets: //////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////// 
+    -->
+    
+    <target name="all-j2se" depends="clean,jar-base,jar-awt,jar-swing" description="Build J2SE group." />
+    <target name="all-midp1" depends="clean,jar-base,jar-midp,jar-midp-siemens,jar-midp-nokia" description="Build J2ME/Midp1 group." />
+    <target name="all-midp2" depends="clean,jar-base,jar-midp2" description="Build J2ME/Midp2 group." />    
+    <target name="all-j2me" depends="all-midp1,all-midp2" description="Build J2ME/Midp1&amp;2 group." />    
+    <target name="all-extra" depends="clean,jar-superwaba" description="Build Extra group." />
+    <target name="all" depends="clean,all-j2se,all-j2me,all-extra" description="Build all available groups.">          
+        <antcall target="clean-classes"/>
+    </target>
+    
+    <!-- //////////////////////////////////////////////////////////////////////////////////////////////////// -->
+    
+    <target name="javadoc" depends="_init-javadocs,init" description="Build Javadocs." >        
+        <delete dir="${javadoc.dir}" quiet="true" includeemptydirs="true"/>
+        <mkdir dir="${javadoc.dir}" />
+        <javadoc 
+            destdir="${javadoc.dir}" 
+            author="true" 
+            version="true" 
+            use="true"             
+            windowtitle="${project.name} v${project.version} JavaDoc API"
+        >            
+            <fileset dir="${src.dir}">
+                <patternset refid="package.javadocs"/>
+            </fileset>                            
+        </javadoc>        
+        <copy file="${home.dir}/res/overview-summary.html" tofile="${javadoc.dir}/overview-summary.html" overwrite="true"/>
+    </target>
+
+    <target name="clean-classes" depends="init" description="Clean all classes built">
+        <echo message="Cleaning up classes.."/>
+        <delete dir="${classes.dir}" quiet="true" includeemptydirs="true"/>
+    </target>
+    
+    <target name="clean" depends="clean-classes" description="Clean all builds">        
+        <delete dir="${javadoc.dir}" quiet="true" includeemptydirs="true"/>
+        <delete dir="${jar.dir}" quiet="true" includeemptydirs="true"/>
+    </target>
+
+</project>

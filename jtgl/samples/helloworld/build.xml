@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<project name="HelloWorld" default="app-all" basedir=".">	
+        <property name="root.path" value="${basedir}/../.."/>        
+	<import file="${root.path}/build.xml"/>                
+        <!--/////// App Config: ////////////////////////////////////////////////////////-->
+        <property name="app.src" location="."/>             
+        
+        <property name="app.title" value="HelloWorld JTGL"/>             
+        <!--
+        <property name="app.vendor" value="JTGL Project"/>             
+        <property name="app.version" value="1.1"/>             
+        -->
+        
+        <!-- AWT Target: -->
+        <!--
+        <property name="app.target" value="awt"/>           
+        <property name="app.mainclass" value="samples.helloworld.AwtMappletRunner"/> 
+        -->
+                
+        <!-- Swing Target: -->
+        <!--
+        <property name="app.target" value="swing"/>           
+        <property name="app.mainclass" value="samples.helloworld.SWingMappletRunner"/> 
+        -->
+        
+        <!-- MIDP Target: -->
+        <!--
+        <property name="app.target" value="midp"/>           
+        <property name="app.mainclass" value="samples.helloworld.MidpMappletRunner"/> 
+        -->
+                    
+        <!-- MIDP Nokia Target: -->        
+        <!--
+        <property name="app.target" value="midp-nokia"/>        
+        <property name="app.mainclass" value="samples.helloworld.MidpMappletRunner"/> 
+        -->
+
+        <!-- MIDP Siemens Target: -->        
+        <!--
+        <property name="app.target" value="midp-siemens"/>                           
+        <property name="app.mainclass" value="samples.helloworld.MidpMappletRunner"/> 
+        -->
+        
+        <!-- MIDP2 Target: -->        
+        <!--
+        <property name="app.target" value="midp2"/>           
+        <property name="app.mainclass" value="samples.helloworld.MidpMappletRunner"/>         
+        -->
+        
+        <!-- SuperWaba Target: -->
+        
+        <property name="app.target" value="superwaba"/>           
+        <property name="app.subtarget" value="palmos"/>           
+        <property name="app.mainclass" value="samples.helloworld.SWMappletRunner"/>         
+        
+     
+        <!--////////////////////////////////////////////////////////////////////////////-->
+        <target name="app-all" depends="app-clean,app-jar,app-clean-classes" description="Builds all"/>            
+
+        
+        <target name="app-build">                        
+            <antcall target="_app-build"/> 
+        </target>       
+        
+        <target name="app-run" description="Runs the application target">
+            <antcall target="_app-run"/> 
+        </target>         
+        
+        <target name="app-clean" description="Clean up (classes and dist folders).">
+            <antcall target="_app-clean-all"/>
+        </target>
+        
+        <target name="app-clean-classes" description="Clean up (classes folder).">
+            <antcall target="_app-clean-classes"/>
+        </target>
+        
+</project>

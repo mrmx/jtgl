@@ -38,6 +38,7 @@
         <property name="wtk.compiler.verbose" value="false"/>        
         <!-- Wireless Toolkit antenna config: -->
         <property name="wtkjad.update" value="yes"/>
+        <property name="wtk.obfuscate" value="no"/>
         
         <!--/////////////////////////////////////////////////////-->
         <!-- Do not change this properties: -->
@@ -743,9 +744,10 @@
         <wtkpackage 
             basedir="${classes.dir}/${package}" 
             compress="true" 
+            obfuscate="${wtk.obfuscate}"
             jarfile="${jar.name}.jar" 
             jadfile="${jar.name}.jad"  
-            preverify="false">        
+            preverify="${wtk.compiler.preverify}">        
         </wtkpackage>                           
     </target>
     

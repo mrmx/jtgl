@@ -8,7 +8,7 @@ package org.jtgl.util;
 
 /**
  * Vector of integers, with similar <code>java.util.Vector</code> API
- * @author  Manuel
+ * @author  Manuel Polo (manuel_polo@yahoo.es)
  */
 public final class IntVector {
     int [] vector;

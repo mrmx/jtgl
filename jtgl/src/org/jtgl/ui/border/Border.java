@@ -10,7 +10,7 @@ import org.jtgl.ui.*;
 
 /**
  * Paints a border
- * @author mrmx
+ * @author Manuel Polo (manuel_polo@yahoo.es)
  */
 public abstract class Border {
     

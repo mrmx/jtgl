@@ -572,16 +572,17 @@ public abstract class JTGLGraphics {
     }
     
     /**
-     * @param x1
-     * @param y1
-     * @param x2
-     * @param y2
-     * @param x3
-     * @param y3
+     * Fills a defined triangle with current foreground color.
+     *
+     * @param x1 X coordinate of triangle vertex 1
+     * @param y1 Y coordinate of triangle vertex 1
+     * @param x2 X coordinate of triangle vertex 2
+     * @param y2 Y coordinate of triangle vertex 2
+     * @param x3 X coordinate of triangle vertex 3
+     * @param y3 Y coordinate of triangle vertex 3
      */    
     public void fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3) {
-        //TODO: Real Fill on fb impl
-        drawTriangle(x1, y1, x2, y2, x3, y3);
+        Primitives.fillDirectTriangle(this, x1, y1,x2,y2,x3,y3);
     }
     
     /**

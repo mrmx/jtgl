@@ -9,7 +9,7 @@
 
     <target name="config">                        
         <!-- ///// Paths config: ////// -->
-        <property name="classes" value="classes"/>
+        <property name="classes" value="classes.tmp"/>
         <property name="sources" value="src"/>
         <property name="libs" value="lib"/>
         <property name="jars" value="dist"/>

@@ -14,12 +14,18 @@ import org.jtgl.core.*;
  */
 public final class SpriteList {
     private Sprite root,last;
+    private Sprite collidedSprite;
     private int numSprites;
     /** Creates a new instance of SpriteList */
     public SpriteList() {
         numSprites = 0;
     }
     
+    /**
+     * 
+     * @param sprite 
+     * @return 
+     */
     public boolean add(Sprite sprite){
         if(sprite == null)
             return false;
@@ -40,6 +46,11 @@ public final class SpriteList {
         return true;
     }
     
+    /**
+     * 
+     * @param sprite 
+     * @return 
+     */
     public boolean remove(Sprite sprite){
         if(sprite == null || numSprites == 0 || sprite.list != this )
             return false;        
@@ -61,10 +72,18 @@ public final class SpriteList {
         return true;
     }
     
+    /**
+     * 
+     * @return 
+     */
     public int getSize(){
         return numSprites;
     }
     
+    /**
+     * 
+     * @return 
+     */
     public boolean isEmpty() {
 	return numSprites == 0;
     }
@@ -74,10 +93,19 @@ public final class SpriteList {
             ;
     }
     
+    /**
+     * 
+     * @return 
+     */
     public Sprite getFirst() {
         return root;
     }
         
+    /**
+     * 
+     * @param index 
+     * @return 
+     */
     public Sprite getSprite(int index) {
         if(index >= numSprites || index < 0)
             return null;
@@ -95,6 +123,10 @@ public final class SpriteList {
         }
     }
     
+    /**
+     * 
+     * @param client 
+     */
     public void setActionTriggerListener(TriggerListener client){
         Sprite sprite = root;
         while(sprite != null){
@@ -105,6 +137,10 @@ public final class SpriteList {
         }
     }
 
+    /**
+     * 
+     * @param client 
+     */
     public void setAnimationTriggerListener(TriggerListener client){
         Sprite sprite = root;
         while(sprite != null){
@@ -116,6 +152,10 @@ public final class SpriteList {
     }
 
     
+    /**
+     * 
+     * @param currentTime 
+     */
     public void action(long currentTime){
         Sprite sprite = root;
         while(sprite != null){
@@ -124,6 +164,10 @@ public final class SpriteList {
         }
     }
 
+    /**
+     * 
+     * @param currentTime 
+     */
     public void animate(long currentTime){
         Sprite sprite = root;
         while(sprite != null){
@@ -132,6 +176,10 @@ public final class SpriteList {
         }
     }
 
+    /**
+     * 
+     * @param visible 
+     */
     public void setVisible(boolean visible){
         Sprite sprite = root;
         while(sprite != null){
@@ -140,6 +188,11 @@ public final class SpriteList {
         }
     }
     
+    /**
+     * 
+     * @param moveX 
+     * @param moveY 
+     */
     public void setMove(int moveX,int moveY){
         Sprite sprite = root;
         while(sprite != null){
@@ -164,6 +217,11 @@ public final class SpriteList {
         }
     }
     
+    /**
+     * 
+     * @param dx 
+     * @param dy 
+     */
     public void move(int dx,int dy){
         Sprite sprite = root;
         while(sprite != null){
@@ -172,6 +230,12 @@ public final class SpriteList {
         }
     }
     
+    /**
+     * 
+     * @param x 
+     * @param y 
+     * @param doValidate 
+     */
     public void moveRefTo(int x ,int y ,boolean doValidate){
         Sprite sprite = root;
         while(sprite != null){
@@ -190,6 +254,7 @@ public final class SpriteList {
     
     /**
      * Draw from Front to Background
+     * @param gc 
      */
     public void drawFB(JTGLGraphics gc){     
         Sprite sprite = last;
@@ -199,6 +264,14 @@ public final class SpriteList {
         }
     }    
     
+    /**
+     * 
+     * @param x 
+     * @param y 
+     * @param width 
+     * @param height 
+     * @return 
+     */
     public boolean collidesWithBounds(int x,int y,int width,int height){
         Sprite sprite = root;
         while(sprite != null){
@@ -209,8 +282,45 @@ public final class SpriteList {
         return false;
     }
     
+    /**
+     * 
+     * @param rect 
+     * @return 
+     */
     public boolean collidesWithBounds(JTGLRect rect){
         return rect == null? false : collidesWithBounds(rect.getX(),rect.getY(),rect.getWidth(),rect.getHeight());
     }
     
+    /**
+     * Method to test if any sprite element within this <CODE>SpriteList</CODE> has collided with a given <CODE>Sprite</CODE>.
+     * This method only checks visible sprites.
+     * @param sprite external <CODE>Sprite</CODE> to test collision.
+     * @return index of <CODE>SpriteGroup</CODE> element that collided with given sprite.
+     * Return -1 if no element collided with the sprite.
+     */
+    public int collidesWith(Sprite sprite){
+        int index = 0;
+        int collideIndex = - 1;
+        Sprite internalSprite = root;
+        collidedSprite = null;
+        while(internalSprite != null){                        
+            if(internalSprite.visible  && internalSprite.collidesWith(sprite)) {
+                collideIndex = index;
+                collidedSprite = internalSprite;
+                break;
+            }
+            index++;
+            internalSprite = internalSprite.next;;
+        }
+        return collideIndex;
+    }
+        
+    /**
+     * 
+     * @return last <CODE>Sprite</CODE> that collided on method collidesWith(Sprite),
+     * or null if none.
+     */
+    public Sprite getLastCollided(){
+        return collidedSprite;
+    }    
 }

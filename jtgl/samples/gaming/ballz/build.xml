@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<project name="BallzDemo" default="all" basedir=".">	
+        <property name="root.path" value="${basedir}/../../.."/>        
+        <!--/////// Lib Config: ////////////////////////////////////////////////////////-->
+        <property name="gaming_api" value="yes"/>        
+	<import file="${root.path}/build.xml"/>    
+                            
+        <!--/////// App Config: ////////////////////////////////////////////////////////-->
+        <property name="app.src" location="."/>             
+        <property name="app.resource.dir" value="res"/>                            
+        
+        <target name="target-awt" description="AWT Target">
+            <property name="app.target" value="awt"/>           
+            <property name="app.mainclass" value="samples.gaming.ballz.AwtMappletRunner"/> 
+            <property name="app.resource.filter" value="*.png"/>  
+            <antcall target="${main.task}"/>
+        </target>
+        
+        <target name="target-swing" description="Swing Target">
+            <property name="app.target" value="swing"/>           
+            <property name="app.mainclass" value="samples.gaming.ballz.SWingMappletRunner"/> 
+            <property name="app.resource.filter" value="*.png"/>  
+            <antcall target="${main.task}"/>
+        </target>        
+        
+        <target name="target-midp" description="J2ME/Midp1 Target">
+            <property name="app.target" value="midp"/>           
+            <property name="app.mainclass" value="samples.gaming.ballz.MidpMappletRunner"/> 
+            <property name="app.resource.filter" value="*.png"/>  
+            <antcall target="${main.task}"/>
+        </target>                    
+        
+        <target name="target-midp-nokia" description="J2ME/Midp1 Nokia Target">
+            <property name="app.target" value="midp-nokia"/>        
+            <antcall target="target-midp"/>
+        </target>
+
+        
+        <target name="target-midp-siemens" description="J2ME/Midp1 Siemens Target">
+            <property name="app.target" value="midp-siemens"/>                           
+            <antcall target="target-midp"/>
+        </target>
+        
+        <target name="target-midp2" description="J2ME/Midp2 Target">
+            <property name="app.target" value="midp2"/>           
+            <antcall target="target-midp"/>
+        </target>
+
+        <target name="target-superwaba" description="SuperWaba Target">
+            <property name="app.target" value="superwaba"/>           
+            <property name="app.mainclass" value="samples.gaming.ballz.SWMappletRunner"/>         
+            <property name="app.resource.filter" value="*.bmp"/>  
+            <antcall target="${main.task}"/>
+        </target>
+     
+        <target name="jar-all" depends="app-clean" description="Jars all available targets">
+            <property name="main.task" value="app-jar"/>      
+            <antcall target="target-awt"/>
+            <antcall target="target-swing"/>
+            <antcall target="target-midp"/>
+            <antcall target="target-midp-nokia"/>
+            <antcall target="target-midp-siemens"/>
+            <antcall target="target-midp2"/>
+            <antcall target="target-superwaba"/>
+        </target>
+        
+        <target name="run-all" depends="app-clean" description="Runs all available targets">
+            <property name="main.task" value="app-run"/>      
+            
+            <antcall target="target-awt"/>           
+            <!--             
+            <antcall target="target-swing"/>            
+            <antcall target="target-midp"/>
+            <antcall target="target-midp"/>
+            <antcall target="target-midp-nokia"/>
+            <antcall target="target-midp-siemens"/>
+            <antcall target="target-midp2"/>
+            <antcall target="target-superwaba"/>
+            -->
+            
+            
+        </target>
+        
+        
+        <!--////////////////////////////////////////////////////////////////////////////-->
+        <target name="all" depends="jar-all" description="Builds all"/>              
+                
+        <target name="app-build">                        
+            <antcall target="_app-build"/> 
+        </target>       
+        
+        <target name="app-run" description="Runs the application target">
+            <antcall target="_app-run"/> 
+        </target>         
+        
+        <target name="app-clean" description="Clean up (classes and dist folders).">
+            <antcall target="_app-clean-all"/>
+        </target>
+        
+        <target name="app-clean-classes" description="Clean up (classes folder).">
+            <antcall target="_app-clean-classes"/>
+        </target>
+        
+</project>

@@ -177,7 +177,11 @@
         </antcall>        
     </target>
 
-    <target name="init-midp" depends="init" >                   
+    <target name="init-midp" depends="init" >    
+        <condition property="antenna.available">            
+            <available file="${antenna.lib}"/>            
+        </condition>                
+        <fail unless="antenna.available" message="Antenna library not found at ${antenna.lib} please edit build.properties file and change the antenna.lib property."/>               
         <taskdef resource="antenna.properties" classpath="${antenna.lib}"/>          
     </target>
     

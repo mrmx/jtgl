@@ -5,3 +5,5 @@ Java Tiny Gfx Library (**JTGL**) is a graphic fundation framework (a graphics/ga
 - SuperWaba(Palm,PPC,Symbian)
 - ExEn
 - DoJa,etc..
+
+Moved from old times CVS repo at https://sourceforge.net/projects/jtgl/ :-)
